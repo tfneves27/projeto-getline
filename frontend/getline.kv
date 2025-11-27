@@ -1,0 +1,236 @@
+#:import HomeScreen main.HomeScreen
+#:import CartScreen main.CartScreen
+#:import ProdutoCard main.ProdutoCard
+
+<ProdutoCard>:
+    orientation: 'vertical'
+    padding: "8dp"
+    size_hint_y: None
+    height: "220dp"
+    elevation: 1
+    radius: [10,]
+    md_bg_color: "#FFFFFF"
+
+    AsyncImage:
+        source: root.imagem_url
+        size_hint_y: .55
+        keep_ratio: True
+        allow_stretch: True
+
+    MDLabel:
+        text: root.nome
+        halign: 'center'
+        theme_text_color: "Primary"
+        bold: True
+        font_style: "Subtitle1"
+        size_hint_y: .15
+
+    MDLabel:
+        text: f"R$ {root.preco}"
+        halign: 'center'
+        theme_text_color: "Secondary"
+        font_style: "Caption"
+        size_hint_y: .15
+
+    MDIconButton:
+        icon: "cart-plus"
+        theme_text_color: "Custom"
+        text_color: "#283593"
+        pos_hint: {"center_x": .5}
+        on_release: root.adicionar_ao_carrinho()
+        size_hint_y: .15
+
+<CartScreen>:
+    name: 'carrinho'
+    text: 'Carrinho'
+    icon: 'cart'
+    md_bg_color: "#F5F5F5"
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        
+        MDTopAppBar:
+            title: "Meu Carrinho"
+            anchor_title: "center"
+            elevation: 0
+            md_bg_color: "#F5F5F5"
+            specific_text_color: "#333333"
+
+        MDBoxLayout:
+            orientation: 'vertical'
+            padding: "20dp"
+            spacing: "10dp"
+            size_hint_y: None
+            height: "200dp"
+
+            MDTextField:
+                id: campo_nome
+                hint_text: "Seu Nome"
+                mode: "rectangle"
+
+            MDTextField:
+                id: campo_observacao
+                hint_text: "Observações"
+                mode: "rectangle"
+                multiline: True
+                max_text_length: 200
+
+            MDRaisedButton:
+                text: "FINALIZAR PEDIDO"
+                pos_hint: {"center_x": .5}
+                md_bg_color: "#25D366"
+                text_color: "#FFFFFF"
+                on_release: root.finalizar_pedido()
+
+        MDScrollView:
+            MDList:
+                id: cart_list
+                padding: "10dp"
+                spacing: "10dp"
+
+<RootWidget>:
+    MDScreen:
+        md_bg_color: "#F5F5F5"
+
+        MDBottomNavigation:
+            id: bottom_nav
+            panel_color: "#FFFFFF"
+            selected_color_background: "#81D4FA"
+            text_color_active: "#283593"
+            text_color_normal: "#757575"
+
+            # --- ABA 1: INÍCIO ---
+            HomeScreen:
+                id: home_screen_id
+                name: 'inicio'
+                text: 'Início'
+                icon: 'home'
+                md_bg_color: "#F5F5F5"
+
+                MDSpinner:
+                    id: loading_spinner
+                    size_hint: None, None
+                    size: "40dp", "40dp"
+                    pos_hint: {"center_x": .5, "center_y": .5}
+                    active: False
+
+                MDBoxLayout:
+                    id: main_layout_content
+                    orientation: "vertical"
+                    md_bg_color: "#F5F5F5"
+                    pos_hint: {"top": 1}
+                    size_hint_y: 1
+                    padding: "10dp"
+                    spacing: "10dp"
+
+                    MDBoxLayout:
+                        size_hint_y: None
+                        height: "60dp"
+                        padding: "5dp"
+                        MDTextField:
+                            hint_text: "Buscar produtos..."
+                            mode: "round"
+                            fill_color_normal: 1, 1, 1, 1
+                            icon_right: "magnify"
+                            on_text_validate: home_screen_id.realizar_busca(self.text)
+
+                    MDCarousel:
+                        id: banner_carousel
+                        size_hint_y: None
+                        height: "140dp"
+                        
+                        MDCard:
+                            radius: [15,]
+                            elevation: 2
+                            AsyncImage:
+                                source: "https://i.imgur.com/tE512Lh.png" # SEU BANNER AQUI
+                                allow_stretch: True
+                                keep_ratio: False
+                                radius: [15,]
+
+                    MDLabel:
+                        text: "Destaques"
+                        font_style: "H6"
+                        bold: True
+                        size_hint_y: None
+                        height: "30dp"
+                        padding_x: "5dp"
+
+                    MDScrollView:
+                        do_scroll_x: False
+                        MDGridLayout:
+                            id: product_grid
+                            cols: 2
+                            padding: "5dp"
+                            spacing: "10dp"
+                            adaptive_height: True
+                            size_hint_y: None
+
+            # --- ABA 2: CATEGORIAS ---
+            MDBottomNavigationItem:
+                name: 'categorias'
+                text: 'Categorias'
+                icon: 'view-grid'
+                md_bg_color: "#F5F5F5"
+                
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    MDTopAppBar:
+                        title: "Categorias"
+                        elevation: 0
+                        md_bg_color: "#F5F5F5"
+                        specific_text_color: "#333333"
+                    MDScrollView:
+                        MDList:
+                            OneLineIconListItem:
+                                text: "Fones"
+                                on_release: 
+                                    app.definir_busca("Fone")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "headphones"
+                            OneLineIconListItem:
+                                text: "Carregadores"
+                                on_release: 
+                                    app.definir_busca("Carregador")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "battery-charging"
+                            OneLineIconListItem:
+                                text: "Capinhas"
+                                on_release: 
+                                    app.definir_busca("Capa")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "cellphone"
+
+            # --- ABA 3: CONTATO ---
+            MDBottomNavigationItem:
+                name: 'contato'
+                text: 'Contato'
+                icon: 'card-account-phone'
+                md_bg_color: "#F5F5F5"
+                
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    padding: "30dp"
+                    spacing: "20dp"
+                    MDIcon:
+                        icon: "store"
+                        halign: "center"
+                        font_size: "80dp"
+                        theme_text_color: "Custom"
+                        text_color: "#283593"
+                    MDLabel:
+                        text: "Getline Acessórios"
+                        halign: "center"
+                        font_style: "H5"
+                    MDLabel:
+                        text: "WhatsApp: (11) 99999-9999"
+                        halign: "center"
+
+            # --- ABA 4: CARRINHO ---
+            CartScreen:
+                name: 'carrinho'
+                text: 'Carrinho'
+                icon: 'cart'
