@@ -18,6 +18,10 @@ class BannerPromocao(BaseModel):
 
 origins = ["*"]
 
+def ler_banco():
+    with open("database.json", "r", encoding="utf-8") as arquivo:
+        return json.load(arquivo)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
