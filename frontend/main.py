@@ -37,6 +37,7 @@ class ItemCarrinho(TwoLineAvatarIconListItem):
         self.remover_callback = remover_callback
 
     def remover_clicado(self):
+        print(f"Lixeira clicada para: {self.produto_original['nome']}")
         self.remover_callback(self.produto_original, self)
 
 class RootWidget(FloatLayout):
@@ -109,9 +110,15 @@ class CartScreen(MDBottomNavigationItem):
             lista_visual.add_widget(list_item)
 
     def remover_item_da_lista(self, produto, widget_da_lista):
-        self.carrinho.remover_item(produto)
-        self.ids.cart_list.remove_widget(widget_da_lista)
+        try:
+            print("Tentando remover item...")
+            self.carrinho.remover_item(produto)
+            self.ids.cart_list.remove_widget(widget_da_lista)
+            print("Item removido com sucesso!")
 
+        except Exception as e:
+            print(f"ERRO AO REMOVER (Mas o app não fechou!): {e}")
+            
     def finalizar_pedido(self):
         nome = self.ids.campo_nome.text
         observacao = self.ids.campo_observacao.text
@@ -139,7 +146,7 @@ class CartScreen(MDBottomNavigationItem):
 
         from urllib.parse import quote
         mensagem_codificada = quote(mensagem)
-        numero_loja = "5511999999999" # <-- SEU NUMERO AQUI
+        numero_loja = "551193198031"
         link_whatsapp = f"https://wa.me/{numero_loja}?text={mensagem_codificada}"
 
         webbrowser.open(link_whatsapp)

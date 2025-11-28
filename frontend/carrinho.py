@@ -8,3 +8,14 @@ class Carrinho():
 
     def get_total(self):
         return sum(item['preco'] for item in self.itens)
+    
+    # --- O MÉTODO QUE ESTAVA FALTANDO ---
+    def remover_item(self, produto):
+        if produto in self.itens:
+            self.itens.remove(produto)
+            print(f"Item removido do carrinho: {produto['nome']}")
+
+    # --- O OUTRO MÉTODO IMPORTANTE ---
+    def limpar(self):
+        self.itens = []
+        print("Carrinho esvaziado.")
