@@ -69,22 +69,48 @@ class HomeScreen(MDBottomNavigationItem):
         spinner.active = True 
         content.opacity = 0
         
-        service = ApiService()
-        # Busca dados da API
-        lista_de_produtos = await service.buscar_produtos_destaque(termo=termo)
-
-        grid.clear_widgets()
-        for produto in lista_de_produtos:
-            novo_card = ProdutoCard(
-                nome=produto['nome'],
-                preco=produto['preco'],
-                imagem_url=produto['imagem_url']
-            )
-            grid.add_widget(novo_card)
+        # BLINDAGEM DE ERRO
+        try:
+            print("Conectando API...")
+            service = ApiService()
             
-        spinner.active = False 
-        content.opacity = 1 
+            # Tenta buscar
+            lista_de_produtos = await service.buscar_produtos_destaque(termo=termo)
 
+            # Se der certo, preenche a grade
+            grid.clear_widgets()
+            for produto in lista_de_produtos:
+                novo_card = ProdutoCard(
+                    nome=produto['nome'],
+                    preco=produto['preco'],
+                    imagem_url=produto['imagem_url']
+                )
+                grid.add_widget(novo_card)
+
+            # Se chegou aqui, sucesso! Mostra o conteúdo
+            content.opacity = 1
+
+        except Exception as e:
+            # SE DER ERRO, NÃO FECHA O APP!
+            # Mostra o erro na tela para você ler
+            from kivymd.uix.dialog import MDDialog
+            from kivymd.uix.button import MDFlatButton
+            
+            print(f"ERRO FATAL: {e}")
+            
+            self.dialogo_erro = MDDialog(
+                title="Erro de Conexão",
+                text=f"Ocorreu um erro:\n{str(e)}",
+                buttons=[
+                    MDFlatButton(text="FECHAR", on_release=lambda x: self.dialogo_erro.dismiss())
+                ],
+            )
+            self.dialogo_erro.open()
+            
+        finally:
+            # Desliga o spinner aconteça o que acontecer
+            spinner.active = False
+            
 class CartScreen(MDBottomNavigationItem):
     def on_enter(self):
         app = MDApp.get_running_app()
