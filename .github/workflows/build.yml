@@ -1,34 +1,28 @@
-name: Build Android APK
+name: Build APK
+
 on:
   push:
     branches: [ "master", "main" ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
+      # 1. Baixa seu código
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Free Disk Space
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf "/usr/local/share/boost"
+      # 2. CONSTRÓI O APK (Usando uma máquina pronta/Docker)
+      # Isso elimina erros de instalação de Linux
+      - name: Build with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
+        with:
+          workdir: frontend
+          buildozer_version: stable
 
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libltdl-dev libffi-dev libssl-dev libncurses5-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libtool autoconf automake libtool-bin zlib1g-dev zip unzip
-
-      - name: Install Buildozer
-        run: pip install buildozer cython==0.29.33
-
-      - name: Build APK
-        working-directory: ./frontend
-        run: |
-          buildozer android clean
-          yes | buildozer android debug
-
+      # 3. Envia o arquivo para você baixar
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
