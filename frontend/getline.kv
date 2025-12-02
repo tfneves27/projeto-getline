@@ -114,6 +114,16 @@
                 text_color: "#FFFFFF"
                 on_release: root.finalizar_pedido()
 
+            MDLabel:
+                id: lbl_total
+                text: "Total: R$ 0.00"
+                halign: "center"
+                bold: True
+                font_style: "H6"
+                theme_text_color: "Custom"
+                text_color: "#283593"
+                adaptive_height: True
+
         MDScrollView:
             MDList:
                 id: cart_list
@@ -245,29 +255,78 @@
                                     icon: "cellphone"
 
             # --- ABA 3: CONTATO ---
+
             MDBottomNavigationItem:
                 name: 'contato'
                 text: 'Contato'
                 icon: 'card-account-phone'
                 md_bg_color: "#F5F5F5"
-                
-                MDBoxLayout:
-                    orientation: 'vertical'
-                    padding: "30dp"
-                    spacing: "20dp"
+
+                MDCard:
+                    orientation: "vertical"
+                    size_hint: None, None
+                    size: "500dp", "450dp"
+                    pos_hint: {"center_x": .5, "center_y": .5}
+                    radius: [20,]
+                    elevation: 4
+                    padding: "20dp"
+                    spacing: "15dp"
+
                     MDIcon:
-                        icon: "store"
+                        icon: "store-outline"
                         halign: "center"
-                        font_size: "80dp"
+                        font_size: "70sp"
                         theme_text_color: "Custom"
                         text_color: "#283593"
+                    
                     MDLabel:
-                        text: "📍 Rua Adalcindo Lafaiete, 84, Zabelê"
+                        text: "Getline Acessórios"
                         halign: "center"
+                        bold: True
                         font_style: "H5"
+                        adaptive_height: True
+
                     MDLabel:
-                        text: "WhatsApp: (11) 99319-8031"
+                        text: "Tecnologia e Qualidade"
                         halign: "center"
+                        theme_text_color: "Secondary"
+                        font_style: "Caption"
+                        adaptive_height: True
+
+                    MDSeparator:
+
+                    # Lista de Informações
+                    MDScrollView:
+                        MDList:
+                            OneLineIconListItem:
+                                text: "Os melhores produtos da melhor qualidade"
+                                IconLeftWidget:
+                                    icon: "check-decagram"
+                                    theme_text_color: "Custom"
+                                    text_color: "#283593"
+
+                            OneLineIconListItem:
+                                text: "Rua Adalcindo Lafaiete, 84, Zabelê"
+                                IconLeftWidget:
+                                    icon: "map-marker"
+                                    theme_text_color: "Custom"
+                                    text_color: "#283593"
+
+                            OneLineIconListItem:
+                                text: "Seg. a Sáb. - 08h às 18h"
+                                IconLeftWidget:
+                                    icon: "clock-outline"
+                                    theme_text_color: "Custom"
+                                    text_color: "#283593"
+
+                    # Botão de Suporte (Opcional)
+                    MDRoundFlatIconButton:
+                        text: "Falar com a proprietária"
+                        icon: "whatsapp"
+                        pos_hint: {"center_x": .5}
+                        text_color: "#25D366"
+                        line_color: "#25D366"
+                        icon_color: "#25D366"
 
             # --- ABA 4: CARRINHO ---
             CartScreen:

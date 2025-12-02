@@ -13,13 +13,13 @@ from api_service import ApiService
 from kivymd.uix.textfield import MDTextField
 from carrinho import Carrinho
 from kivymd.uix.list import TwoLineAvatarListItem, ImageLeftWidget, OneLineIconListItem, IconLeftWidget, TwoLineAvatarIconListItem, IconRightWidget
-from kivymd.uix.fitimage import FitImage
+from kivymd.uix.fitimage import FitImage # Importante para o banner
 
 # --- 1. COMPONENTES ---
 class ProdutoCard(MDCard):
     nome = StringProperty()
     preco = NumericProperty()
-    preco_original = NumericProperty()
+    preco_original = NumericProperty() # Preço antigo para desconto
     imagem_url = StringProperty()
 
     def adicionar_ao_carrinho(self):
@@ -30,6 +30,7 @@ class ProdutoCard(MDCard):
             "imagem_url": self.imagem_url
         }
         app.carrinho.adicionar_item(novo_item)
+        # Feedback visual simples (opcional)
         print(f"Comprado: {self.nome}")
 
 class ItemCarrinho(TwoLineAvatarIconListItem):
@@ -39,7 +40,6 @@ class ItemCarrinho(TwoLineAvatarIconListItem):
         self.remover_callback = remover_callback
 
     def remover_clicado(self):
-        print(f"Lixeira clicada para: {self.produto_original['nome']}")
         self.remover_callback(self.produto_original, self)
 
 class RootWidget(FloatLayout):
@@ -49,118 +49,90 @@ class RootWidget(FloatLayout):
 class HomeScreen(MDBottomNavigationItem):
     def on_enter(self):
         app = MDApp.get_running_app()
-        # Verifica se a aba Categorias encomendou uma busca
         termo = app.termo_pendente
-        # Se tem encomenda, busca ela. Se não, busca tudo (destaques).
+        
+        # Carrega tudo em paralelo
         asyncio.create_task(self.fetch_products(termo=termo))
         asyncio.create_task(self.fetch_banners())
-        # Limpa a encomenda
+        
         app.termo_pendente = None
 
+    def realizar_busca(self, texto_digitado):
+        asyncio.create_task(self.fetch_products(termo=texto_digitado))
+
+    # Busca e cria os banners dinamicamente
     async def fetch_banners(self):
         try:
             service = ApiService()
-            # Busca a lista de banners da API (/banners)
             lista_banners = await service.buscar_banners()
-
+            
             carrossel = self.ids.banner_carousel
-            carrossel.clear_widgets() # Limpa os banners velhos/fixos
-
-            for banner in lista_banners:
-                # Cria o slide do carrossel via código
-                card = MDCard(
-                    radius=[15,], elevation=2, 
-                    size_hint=(None, None), 
-                    size=(self.ids.main_layout_content.width - 30, "140dp")
-                )
-                imagem = FitImage(source=banner['imagem_url'], radius=[15,])
-                card.add_widget(imagem)
-                carrossel.add_widget(card)
+            # Se a API retornou banners, limpa os antigos e cria os novos
+            if lista_banners:
+                carrossel.clear_widgets()
+                
+                for banner in lista_banners:
+                    card = MDCard(
+                        radius=[15,],
+                        elevation=2,
+                        size_hint=(None, None),
+                        # Largura dinâmica baseada na tela
+                        size=(self.ids.main_layout_content.width - 30, "140dp")
+                    )
+                    # FitImage garante que a foto não estique
+                    imagem = FitImage(source=banner['imagem_url'], radius=[15,])
+                    card.add_widget(imagem)
+                    carrossel.add_widget(card)
         except Exception as e:
-            print(f"Erro nos banners: {e}")
+            print(f"Erro ao carregar banners: {e}")
 
     async def fetch_products(self, termo=None):
         app = MDApp.get_running_app()
         spinner = app.root.ids.loading_spinner
         content = app.root.ids.main_layout_content
         grid = app.root.ids.product_grid
-
+        
         spinner.active = True 
         content.opacity = 0
-
-        service = ApiService()
-        lista_de_produtos = await service.buscar_produtos_destaque(termo=termo)
-
-        grid.clear_widgets()
-        for produto in lista_de_produtos:
-            novo_card = ProdutoCard(
-                nome=produto['nome'],
-                preco=produto['preco'],
-                # Pega o preço original (se não tiver, usa o preço normal)
-                preco_original=produto.get('preco_original', produto['preco']),
-                imagem_url=produto['imagem_url']
-            )
-            grid.add_widget(novo_card)
-
-        spinner.active = False 
-        content.opacity = 1
         
-        # BLINDAGEM DE ERRO
         try:
-            print("Conectando API...")
             service = ApiService()
-            
-            # Tenta buscar
             lista_de_produtos = await service.buscar_produtos_destaque(termo=termo)
 
-            # Se der certo, preenche a grade
             grid.clear_widgets()
             for produto in lista_de_produtos:
                 novo_card = ProdutoCard(
                     nome=produto['nome'],
                     preco=produto['preco'],
-                    # Pega o preco_original da API (se não tiver, usa o preco normal)
+                    # Garante que existe um preço original
                     preco_original=produto.get('preco_original', produto['preco']),
                     imagem_url=produto['imagem_url']
                 )
                 grid.add_widget(novo_card)
-
-            # Se chegou aqui, sucesso! Mostra o conteúdo
-            spinner.active = False 
+                
             content.opacity = 1
 
         except Exception as e:
-            # SE DER ERRO, NÃO FECHA O APP!
-            # Mostra o erro na tela para você ler
-            from kivymd.uix.dialog import MDDialog
-            from kivymd.uix.button import MDFlatButton
-            
-            print(f"ERRO FATAL: {e}")
-            
-            self.dialogo_erro = MDDialog(
-                title="Erro de Conexão",
-                text=f"Ocorreu um erro:\n{str(e)}",
-                buttons=[
-                    MDFlatButton(text="FECHAR", on_release=lambda x: self.dialogo_erro.dismiss())
-                ],
-            )
-            self.dialogo_erro.open()
-            
+            print(f"Erro ao buscar produtos: {e}")
+        
         finally:
-            # Desliga o spinner aconteça o que acontecer
-            spinner.active = False
-            
+            spinner.active = False 
+
 class CartScreen(MDBottomNavigationItem):
     def on_enter(self):
+        self.atualizar_lista()
+
+    def atualizar_lista(self):
         app = MDApp.get_running_app()
         self.carrinho = app.carrinho
+        
         lista_visual = self.ids.cart_list
         lista_visual.clear_widgets()
         
         for item in self.carrinho.itens:
             list_item = ItemCarrinho(
                 text=item['nome'],
-                secondary_text=f"R$ {item['preco']}",
+                secondary_text=f"R$ {item['preco']:.2f}",
                 produto_original=item,
                 remover_callback=self.remover_item_da_lista
             )
@@ -169,39 +141,52 @@ class CartScreen(MDBottomNavigationItem):
             
             lixeira = IconRightWidget(
                 icon="trash-can",
+                theme_text_color="Custom",
+                text_color="red",
                 on_release=lambda x, i=list_item: i.remover_clicado()
             )
             list_item.add_widget(lixeira)
             lista_visual.add_widget(list_item)
+            
+        # Atualiza o Label de Total
+        total = self.carrinho.get_total()
+        if total > 0:
+            self.ids.lbl_total.text = f"Total: R$ {total:.2f}"
+        else:
+            self.ids.lbl_total.text = "Seu carrinho está vazio"
 
     def remover_item_da_lista(self, produto, widget_da_lista):
         try:
-            print("Tentando remover item...")
             self.carrinho.remover_item(produto)
             self.ids.cart_list.remove_widget(widget_da_lista)
-            print("Item removido com sucesso!")
-
+            self.atualizar_lista() # Recalcula o total
         except Exception as e:
-            print(f"ERRO AO REMOVER (Mas o app não fechou!): {e}")
-            
+            print(f"Erro ao remover: {e}")
+
     def finalizar_pedido(self):
         nome = self.ids.campo_nome.text
         observacao = self.ids.campo_observacao.text
         
+        # Validação de Nome
         if nome == "":
-            print("Preencha seu nome!")
+            self.ids.campo_nome.error = True
+            self.ids.campo_nome.helper_text = "O nome é obrigatório!"
+            self.ids.campo_nome.helper_text_mode = "on_error"
             return
+        
+        self.ids.campo_nome.error = False
 
         app = MDApp.get_running_app()
         carrinho = app.carrinho
         
         if not carrinho.itens:
-            print("Carrinho vazio")
+            self.ids.lbl_total.text = "Adicione itens primeiro!"
             return
 
+        # Monta a mensagem
         mensagem = f"Olá! Sou *{nome}* e gostaria de finalizar o pedido:\n\n"
         for item in carrinho.itens:
-            mensagem += f"• {item['nome']} - R$ {item['preco']}\n"
+            mensagem += f"• {item['nome']} - R$ {item['preco']:.2f}\n"
         
         total = carrinho.get_total()
         mensagem += f"\n*Total: R$ {total:.2f}*"
@@ -211,13 +196,15 @@ class CartScreen(MDBottomNavigationItem):
 
         from urllib.parse import quote
         mensagem_codificada = quote(mensagem)
-        numero_loja = "551193198031"
+        numero_loja = "5511990265476"
         link_whatsapp = f"https://wa.me/{numero_loja}?text={mensagem_codificada}"
 
+        import webbrowser
         webbrowser.open(link_whatsapp)
         
+        # Limpeza final
         carrinho.limpar()
-        self.ids.cart_list.clear_widgets()
+        self.atualizar_lista()
         self.ids.campo_nome.text = ""
         self.ids.campo_observacao.text = ""
 
@@ -225,7 +212,7 @@ class CartScreen(MDBottomNavigationItem):
 class GetlineApp(MDApp):
     def build(self):
         self.carrinho = Carrinho()
-        self.termo_pendente = None # Variável para controlar a busca das categorias
+        self.termo_pendente = None 
         return RootWidget()
     
     def definir_busca(self, termo):
