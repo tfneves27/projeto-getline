@@ -33,6 +33,8 @@ async def get_produtos():
 
 @app.get("/produtos/busca")
 async def buscar_produtos(termo: str | None = None):
+    if termo is None:
+        return db_produtos_mock
     resultados = []
     for produto in db_produtos_mock:
         if termo.lower() in produto["nome"].lower():

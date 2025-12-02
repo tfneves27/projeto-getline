@@ -1,5 +1,5 @@
-{
-  "db_produtos_mock": [
+
+db_produtos_mock = [
     {
       "id": 1,
       "nome": "Acendedor Elétrico de Fogão",
@@ -70,8 +70,9 @@
       "preco_original": 50.00,
       "imagem_url": "https://i.imgur.com/LgeOUWK.jpeg"
     }
-  ],
-  "db_banners_mock": [
+  ]
+
+db_banners_mock = [
     {
       "id": 1,
       "imagem_url": "https://i.imgur.com/NIVWc6n.jpeg"
@@ -81,4 +82,3 @@
       "imagem_url": "https://i.imgur.com/E23t29h.png"
     }
   ]
-}
