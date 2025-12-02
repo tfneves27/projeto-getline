@@ -13,11 +13,13 @@ from api_service import ApiService
 from kivymd.uix.textfield import MDTextField
 from carrinho import Carrinho
 from kivymd.uix.list import TwoLineAvatarListItem, ImageLeftWidget, OneLineIconListItem, IconLeftWidget, TwoLineAvatarIconListItem, IconRightWidget
+from kivymd.uix.fitimage import FitImage
 
 # --- 1. COMPONENTES ---
 class ProdutoCard(MDCard):
     nome = StringProperty()
     preco = NumericProperty()
+    preco_original = NumericProperty()
     imagem_url = StringProperty()
 
     def adicionar_ao_carrinho(self):
@@ -56,45 +58,52 @@ class HomeScreen(MDBottomNavigationItem):
         app.termo_pendente = None
 
     async def fetch_banners(self):
-        carrossel = self.ids.banner_carousel
-        service = ApiService()
+        try:
+            service = ApiService()
+            # Busca a lista de banners da API (/banners)
+            lista_banners = await service.buscar_banners()
 
-        lista_banners = await service.buscar_banners()
+            carrossel = self.ids.banner_carousel
+            carrossel.clear_widgets() # Limpa os banners velhos/fixos
 
-        if lista_banners:
-            carrossel.clear_widgets() # Limpa os banners "fixos" do KV
-            
             for banner in lista_banners:
-                # Cria o Card
+                # Cria o slide do carrossel via código
                 card = MDCard(
-                    radius=[15,],
-                    elevation=2,
-                    size_hint=(None, None),
-                    size=(self.ids.main_layout_content.width - 30, "140dp") # Largura dinâmica
+                    radius=[15,], elevation=2, 
+                    size_hint=(None, None), 
+                    size=(self.ids.main_layout_content.width - 30, "140dp")
                 )
-                
-                # Cria a Imagem
-                imagem = FitImage(
-                    source=banner['imagem_url'],
-                    radius=[15,]
-                )
-                
-                # Monta e adiciona
+                imagem = FitImage(source=banner['imagem_url'], radius=[15,])
                 card.add_widget(imagem)
                 carrossel.add_widget(card)
-                
-    def realizar_busca(self, texto_digitado):
-        # Busca manual pela barra de pesquisa
-        asyncio.create_task(self.fetch_products(termo=texto_digitado))
+        except Exception as e:
+            print(f"Erro nos banners: {e}")
 
     async def fetch_products(self, termo=None):
         app = MDApp.get_running_app()
         spinner = app.root.ids.loading_spinner
         content = app.root.ids.main_layout_content
         grid = app.root.ids.product_grid
-        
+
         spinner.active = True 
         content.opacity = 0
+
+        service = ApiService()
+        lista_de_produtos = await service.buscar_produtos_destaque(termo=termo)
+
+        grid.clear_widgets()
+        for produto in lista_de_produtos:
+            novo_card = ProdutoCard(
+                nome=produto['nome'],
+                preco=produto['preco'],
+                # Pega o preço original (se não tiver, usa o preço normal)
+                preco_original=produto.get('preco_original', produto['preco']),
+                imagem_url=produto['imagem_url']
+            )
+            grid.add_widget(novo_card)
+
+        spinner.active = False 
+        content.opacity = 1
         
         # BLINDAGEM DE ERRO
         try:
@@ -110,11 +119,14 @@ class HomeScreen(MDBottomNavigationItem):
                 novo_card = ProdutoCard(
                     nome=produto['nome'],
                     preco=produto['preco'],
+                    # Pega o preco_original da API (se não tiver, usa o preco normal)
+                    preco_original=produto.get('preco_original', produto['preco']),
                     imagem_url=produto['imagem_url']
                 )
                 grid.add_widget(novo_card)
 
             # Se chegou aqui, sucesso! Mostra o conteúdo
+            spinner.active = False 
             content.opacity = 1
 
         except Exception as e:

@@ -18,6 +18,5 @@ class ApiService:
         try:
             response = await client.get(f"{base_url}/banners")
             return response.json()
-        except Exception as e:
-            print(f"Erro ao buscar banners: {e}")
+        except:
             return[]
