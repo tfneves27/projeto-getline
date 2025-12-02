@@ -55,7 +55,7 @@ class HomeScreen(MDBottomNavigationItem):
         
         # Limpa a encomenda
         app.termo_pendente = None
-
+        
     def realizar_busca(self, texto_digitado):
         # Busca manual pela barra de pesquisa
         asyncio.create_task(self.fetch_products(termo=texto_digitado))
