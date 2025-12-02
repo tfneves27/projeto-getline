@@ -1,5 +1,5 @@
 {
-  "produtos": [
+  "db_produtos_mock": [
     {
       "id": 1,
       "nome": "Acendedor Elétrico de Fogão",
