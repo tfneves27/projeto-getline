@@ -63,10 +63,10 @@ db_produtos_mock = [
 db_promocoes_mock = [
     {
         "id": 1,
-        "imagem_url": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1000&q=80"
+        "imagem_url": "https://i.imgur.com/NIVWc6n.jpeg"
     },
     {
         "id": 2,
-        "imagem_url": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1000&q=80"
+        "imagem_url": "https://i.imgur.com/E23t29h.png"
     }
 ]
