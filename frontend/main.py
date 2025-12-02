@@ -49,13 +49,40 @@ class HomeScreen(MDBottomNavigationItem):
         app = MDApp.get_running_app()
         # Verifica se a aba Categorias encomendou uma busca
         termo = app.termo_pendente
-        
         # Se tem encomenda, busca ela. Se não, busca tudo (destaques).
         asyncio.create_task(self.fetch_products(termo=termo))
-        
+        asyncio.create_task(self.fetch_banners())
         # Limpa a encomenda
         app.termo_pendente = None
-        
+
+    async def fetch_banners(self):
+        carrossel = self.ids.banner_carousel
+        service = ApiService()
+
+        lista_banners = await service.buscar_banners()
+
+        if lista_banners:
+            carrossel.clear_widgets() # Limpa os banners "fixos" do KV
+            
+            for banner in lista_banners:
+                # Cria o Card
+                card = MDCard(
+                    radius=[15,],
+                    elevation=2,
+                    size_hint=(None, None),
+                    size=(self.ids.main_layout_content.width - 30, "140dp") # Largura dinâmica
+                )
+                
+                # Cria a Imagem
+                imagem = FitImage(
+                    source=banner['imagem_url'],
+                    radius=[15,]
+                )
+                
+                # Monta e adiciona
+                card.add_widget(imagem)
+                carrossel.add_widget(card)
+                
     def realizar_busca(self, texto_digitado):
         # Busca manual pela barra de pesquisa
         asyncio.create_task(self.fetch_products(termo=texto_digitado))

@@ -12,8 +12,12 @@ class ApiService:
             response = await client.get(url)
             return response.json()
         
-    async def buscar_promocoes(self):
+    async def buscar_banners(self):
         async with httpx.AsyncClient() as client:
             base_url = "https://getline-api.onrender.com"
-            response = await client.get(f"{base_url}/promocoes")
+        try:
+            response = await client.get(f"{base_url}/banners")
             return response.json()
+        except Exception as e:
+            print(f"Erro ao buscar banners: {e}")
+            return[]
