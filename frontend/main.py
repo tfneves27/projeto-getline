@@ -218,5 +218,18 @@ class GetlineApp(MDApp):
     def definir_busca(self, termo):
         self.termo_pendente = termo
 
+    def abrir_suporte(self):
+        # Seu número (o mesmo do carrinho)
+        numero_loja = "5511990265476" 
+        texto = "Olá! Estou no app Getline e gostaria de tirar uma dúvida."
+        
+        from urllib.parse import quote
+        texto_codificado = quote(texto)
+        
+        link = f"https://wa.me/{numero_loja}?text={texto_codificado}"
+        
+        import webbrowser
+        webbrowser.open(link)
+        
 if __name__ == '__main__':
     asyncio.run(GetlineApp().async_run())

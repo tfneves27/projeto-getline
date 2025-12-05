@@ -35,10 +35,23 @@ async def get_produtos():
 async def buscar_produtos(termo: str | None = None):
     if termo is None:
         return db_produtos_mock
+
     resultados = []
+    
+    termos_busca = termo.lower().split(",") 
+
     for produto in db_produtos_mock:
-        if termo.lower() in produto["nome"].lower():
+        nome_produto = produto["nome"].lower()
+        
+        match = False
+        for t in termos_busca:
+            if t.strip() in nome_produto:
+                match = True
+                break
+        
+        if match:
             resultados.append(produto)
+            
     return resultados
 
 @app.get("/banners", response_model=List[Banner])

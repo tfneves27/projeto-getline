@@ -133,7 +133,6 @@
 <RootWidget>:
     MDScreen:
         md_bg_color: "#F5F5F5"
-
         MDBottomNavigation:
             id: bottom_nav
             panel_color: "#FFFFFF"
@@ -152,9 +151,11 @@
                 MDSpinner:
                     id: loading_spinner
                     size_hint: None, None
-                    size: "40dp", "40dp"
+                    size: "46dp", "46dp"
                     pos_hint: {"center_x": .5, "center_y": .5}
                     active: False
+                    palette: [ [0.16, 0.2, 0.58, 1], ]
+                    line_width: "3dp"
 
                 MDBoxLayout:
                     id: main_layout_content
@@ -232,27 +233,78 @@
                         specific_text_color: "#333333"
                     MDScrollView:
                         MDList:
+                        # Item 1: Fones de Ouvido e Headphones
                             OneLineIconListItem:
-                                text: "Fones"
+                                text: "Fones de Ouvido e Headphones"
                                 on_release: 
-                                    app.definir_busca("Fone")
+                                    app.definir_busca("Fone,Headphone,Bluetooth")
                                     bottom_nav.switch_tab("inicio")
                                 IconLeftWidget:
                                     icon: "headphones"
+                        # Item 2: Carregadores e Fontes
                             OneLineIconListItem:
-                                text: "Carregadores"
+                                text: "Carregadores e Fontes"
                                 on_release: 
-                                    app.definir_busca("Carregador")
+                                    app.definir_busca("Carregador,Fonte,Turbo")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "lightning-bolt"
+                        # Item 3: Cabos e Adaptadores           
+                            OneLineIconListItem:
+                                text: "Cabos e Adaptadores"
+                                on_release: 
+                                    app.definir_busca("Cabo,Adaptador")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "usb-port"
+                        # Item 4: Caixas de Som e Áudio           
+                            OneLineIconListItem:
+                                text: "Caixas de Som e Áudio"
+                                on_release: 
+                                    app.definir_busca("Caixa de som,Áudio,CX de som,Tronsmart Trip,Bluetooth")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "speaker-wireless"
+                        # Item 5: Power Banks e Baterias           
+                            OneLineIconListItem:
+                                text: "Power Banks e Baterias"
+                                on_release: 
+                                    app.definir_busca("Power Bank,Carregador")
                                     bottom_nav.switch_tab("inicio")
                                 IconLeftWidget:
                                     icon: "battery-charging"
+                        # Item 6: Informática e Periféricos       
                             OneLineIconListItem:
-                                text: "Capinhas"
+                                text: "Informática e Periféricos"
                                 on_release: 
-                                    app.definir_busca("Capa")
+                                    app.definir_busca("Mouse,Teclado,Cartão de memória,Drive,Controle,Caneta")
                                     bottom_nav.switch_tab("inicio")
                                 IconLeftWidget:
-                                    icon: "cellphone"
+                                    icon: "laptop"
+                        # Item 7: Suportes, Tripés e Iluminação       
+                            OneLineIconListItem:
+                                text: "Suportes, Tripés e Iluminação"
+                                on_release: 
+                                    app.definir_busca("Braçadeira,Kit,Suporte,Tripé,Ring Light")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "floor-lamp"
+                        # Item 8: Utilidades, Casa e Lazer      
+                            OneLineIconListItem:
+                                text: "Utilidades, Casa e Lazer"
+                                on_release: 
+                                    app.definir_busca("Acendedor,Balança,Dispensador,Filtro,Fita,Lanterna,Luminária,Estação de carregamento,Umidificador,Ventilador")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "home-variant"
+                        # Item 9: Smart Devices e Segurança       
+                            OneLineIconListItem:
+                                text: "Smart Devices e Segurança"
+                                on_release: 
+                                    app.definir_busca("Wifi,Rádio,Relógio,Câmera,MobileTV")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "shield-lock"
 
             # --- ABA 3: CONTATO ---
 
@@ -265,7 +317,7 @@
                 MDCard:
                     orientation: "vertical"
                     size_hint: None, None
-                    size: "500dp", "450dp"
+                    size: "400dp", "450dp"
                     pos_hint: {"center_x": .5, "center_y": .5}
                     radius: [20,]
                     elevation: 4
@@ -299,7 +351,7 @@
                     MDScrollView:
                         MDList:
                             OneLineIconListItem:
-                                text: "Os melhores produtos da melhor qualidade"
+                                text: "Qualidade Garantida"
                                 IconLeftWidget:
                                     icon: "check-decagram"
                                     theme_text_color: "Custom"
@@ -313,7 +365,7 @@
                                     text_color: "#283593"
 
                             OneLineIconListItem:
-                                text: "Seg. a Sáb. - 08h às 18h"
+                                text: "Seg. a Sáb. - 14h às 17h"
                                 IconLeftWidget:
                                     icon: "clock-outline"
                                     theme_text_color: "Custom"
@@ -327,6 +379,7 @@
                         text_color: "#25D366"
                         line_color: "#25D366"
                         icon_color: "#25D366"
+                        on_release: app.abrir_suporte()
 
             # --- ABA 4: CARRINHO ---
             CartScreen:
