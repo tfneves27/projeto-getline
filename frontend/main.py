@@ -13,13 +13,13 @@ from api_service import ApiService
 from kivymd.uix.textfield import MDTextField
 from carrinho import Carrinho
 from kivymd.uix.list import TwoLineAvatarListItem, ImageLeftWidget, OneLineIconListItem, IconLeftWidget, TwoLineAvatarIconListItem, IconRightWidget
-from kivymd.uix.fitimage import FitImage # Importante para o banner
+from kivymd.uix.fitimage import FitImage
 
 # --- 1. COMPONENTES ---
 class ProdutoCard(MDCard):
     nome = StringProperty()
     preco = NumericProperty()
-    preco_original = NumericProperty() # Preço antigo para desconto
+    preco_original = NumericProperty() 
     imagem_url = StringProperty()
 
     def adicionar_ao_carrinho(self):
@@ -30,7 +30,6 @@ class ProdutoCard(MDCard):
             "imagem_url": self.imagem_url
         }
         app.carrinho.adicionar_item(novo_item)
-        # Feedback visual simples (opcional)
         print(f"Comprado: {self.nome}")
 
 class ItemCarrinho(TwoLineAvatarIconListItem):
@@ -50,8 +49,6 @@ class HomeScreen(MDBottomNavigationItem):
     def on_enter(self):
         app = MDApp.get_running_app()
         termo = app.termo_pendente
-        
-        # Carrega tudo em paralelo
         asyncio.create_task(self.fetch_products(termo=termo))
         asyncio.create_task(self.fetch_banners())
         
@@ -67,7 +64,6 @@ class HomeScreen(MDBottomNavigationItem):
             lista_banners = await service.buscar_banners()
             
             carrossel = self.ids.banner_carousel
-            # Se a API retornou banners, limpa os antigos e cria os novos
             if lista_banners:
                 carrossel.clear_widgets()
                 
@@ -76,10 +72,8 @@ class HomeScreen(MDBottomNavigationItem):
                         radius=[15,],
                         elevation=2,
                         size_hint=(None, None),
-                        # Largura dinâmica baseada na tela
                         size=(self.ids.main_layout_content.width - 30, "140dp")
                     )
-                    # FitImage garante que a foto não estique
                     imagem = FitImage(source=banner['imagem_url'], radius=[15,])
                     card.add_widget(imagem)
                     carrossel.add_widget(card)
@@ -104,7 +98,6 @@ class HomeScreen(MDBottomNavigationItem):
                 novo_card = ProdutoCard(
                     nome=produto['nome'],
                     preco=produto['preco'],
-                    # Garante que existe um preço original
                     preco_original=produto.get('preco_original', produto['preco']),
                     imagem_url=produto['imagem_url']
                 )
@@ -147,8 +140,7 @@ class CartScreen(MDBottomNavigationItem):
             )
             list_item.add_widget(lixeira)
             lista_visual.add_widget(list_item)
-            
-        # Atualiza o Label de Total
+
         total = self.carrinho.get_total()
         if total > 0:
             self.ids.lbl_total.text = f"Total: R$ {total:.2f}"
@@ -159,7 +151,7 @@ class CartScreen(MDBottomNavigationItem):
         try:
             self.carrinho.remover_item(produto)
             self.ids.cart_list.remove_widget(widget_da_lista)
-            self.atualizar_lista() # Recalcula o total
+            self.atualizar_lista()
         except Exception as e:
             print(f"Erro ao remover: {e}")
 
@@ -230,6 +222,6 @@ class GetlineApp(MDApp):
         
         import webbrowser
         webbrowser.open(link)
-        
+
 if __name__ == '__main__':
     asyncio.run(GetlineApp().async_run())
