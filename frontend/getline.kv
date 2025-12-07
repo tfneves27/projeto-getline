@@ -1,0 +1,404 @@
+#:import HomeScreen main.HomeScreen
+#:import CartScreen main.CartScreen
+#:import ProdutoCard main.ProdutoCard
+
+<ProdutoCard>:
+    orientation: 'vertical'
+    padding: "8dp"
+    size_hint_y: None
+    height: "240dp"
+    elevation: 1
+    radius: [10,]
+    md_bg_color: "#FFFFFF"
+
+    MDRelativeLayout:
+        size_hint_y: .55
+
+        MDSpinner:
+            size_hint: None, None
+            size: "20dp", "20dp"
+            pos_hint: {"center_x": .5, "center_y": .5}
+            active: True
+            palette: [ [0.16, 0.2, 0.58, 1], ]
+        
+        AsyncImage:
+            source: root.imagem_url
+            keep_ratio: True
+            allow_stretch: True
+            size_hint: .9, .9
+            pos_hint: {"center_x": .5, "center_y": .5}
+
+        MDCard:
+            size_hint: None, None
+            size: "45dp", "20dp"
+            md_bg_color: "red"
+            radius: [5, 0, 5, 0]
+            pos_hint: {"top": 1, "right": 1}
+            elevation: 0
+            opacity: 1 if root.preco_original > root.preco else 0
+            
+            MDLabel:
+                text: "OFF"
+                color: "white"
+                halign: "center"
+                font_style: "Caption"
+                bold: True
+
+    MDLabel:
+        text: root.nome
+        halign: 'center'
+        theme_text_color: "Primary"
+        bold: True
+        font_style: "Subtitle2"
+        size_hint_y: .15
+        shorten: True
+
+    MDBoxLayout:
+        orientation: "vertical"
+        size_hint_y: .15
+        spacing: "2dp"
+
+        MDLabel:
+            text: f"De R$ {root.preco_original:.2f}" if root.preco_original > root.preco else ""
+            halign: 'center'
+            theme_text_color: "Hint"
+            font_style: "Caption"
+            font_size: "11sp"
+        
+        MDLabel:
+            text: f"R$ {root.preco:.2f}"
+            halign: 'center'
+            theme_text_color: "Custom"
+            text_color: "#283593"
+            bold: True
+            font_style: "Subtitle1"
+
+    MDIconButton:
+        icon: "cart-plus"
+        theme_text_color: "Custom"
+        text_color: "#283593"
+        pos_hint: {"center_x": .5}
+        on_release: root.adicionar_ao_carrinho()
+        size_hint_y: .15
+
+<CartScreen>:
+    name: 'carrinho'
+    text: 'Carrinho'
+    icon: 'cart'
+    md_bg_color: "#F5F5F5"
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        
+        MDTopAppBar:
+            title: "Meu Carrinho"
+            anchor_title: "center"
+            elevation: 0
+            md_bg_color: "#F5F5F5"
+            specific_text_color: "#333333"
+
+        MDBoxLayout:
+            orientation: 'vertical'
+            padding: "20dp"
+            spacing: "10dp"
+            size_hint_y: None
+            height: "200dp"
+
+            MDTextField:
+                id: campo_nome
+                hint_text: "Seu Nome"
+                mode: "rectangle"
+
+            MDTextField:
+                id: campo_observacao
+                hint_text: "Observações"
+                mode: "rectangle"
+                multiline: True
+                max_text_length: 200
+
+            MDRaisedButton:
+                text: "FINALIZAR PEDIDO"
+                pos_hint: {"center_x": .5}
+                md_bg_color: "#25D366"
+                text_color: "#FFFFFF"
+                on_release: root.finalizar_pedido()
+
+            MDLabel:
+                id: lbl_total
+                text: "Total: R$ 0.00"
+                halign: "center"
+                bold: True
+                font_style: "H6"
+                theme_text_color: "Custom"
+                text_color: "#283593"
+                adaptive_height: True
+
+        MDScrollView:
+            MDList:
+                id: cart_list
+                padding: "10dp"
+                spacing: "10dp"
+
+<RootWidget>:
+    MDScreen:
+        md_bg_color: "#F5F5F5"
+        MDBottomNavigation:
+            id: bottom_nav
+            panel_color: "#FFFFFF"
+            selected_color_background: "#81D4FA"
+            text_color_active: "#283593"
+            text_color_normal: "#757575"
+
+            # --- ABA 1: INÍCIO ---
+            HomeScreen:
+                id: home_screen_id
+                name: 'inicio'
+                text: 'Início'
+                icon: 'home'
+                md_bg_color: "#F5F5F5"
+
+                MDSpinner:
+                    id: loading_spinner
+                    size_hint: None, None
+                    size: "46dp", "46dp"
+                    pos_hint: {"center_x": .5, "center_y": .5}
+                    active: False
+                    palette: [ [0.16, 0.2, 0.58, 1], ]
+                    line_width: "3dp"
+
+                MDBoxLayout:
+                    id: main_layout_content
+                    orientation: "vertical"
+                    md_bg_color: "#F5F5F5"
+                    pos_hint: {"top": 1}
+                    size_hint_y: 1
+                    padding: "10dp"
+                    spacing: "10dp"
+
+                    MDBoxLayout:
+                        size_hint_y: None
+                        height: "60dp"
+                        padding: "5dp"
+                        MDTextField:
+                            hint_text: "Buscar produtos..."
+                            mode: "round"
+                            fill_color_normal: 1, 1, 1, 1
+                            icon_right: "magnify"
+                            on_text_validate: home_screen_id.realizar_busca(self.text)
+
+                    MDCarousel:
+                        id: banner_carousel
+                        size_hint_y: None
+                        height: "140dp"
+                        
+                        MDCard:
+                            radius: [15,]
+                            elevation: 2
+                            AsyncImage:
+                                source: "https://i.imgur.com/NIVWc6n.jpeg"
+                                allow_stretch: True
+                                keep_ratio: False
+                                radius: [15,]
+                        MDCard:
+                            radius: [15,]
+                            elevation: 2
+                            AsyncImage:
+                                source: "https://i.imgur.com/E23t29h.png"
+                                allow_stretch: True
+                                keep_ratio: False
+                                radius: [15,]
+
+                    MDLabel:
+                        text: "Destaques"
+                        font_style: "H6"
+                        bold: True
+                        size_hint_y: None
+                        height: "30dp"
+                        padding_x: "5dp"
+
+                    MDScrollView:
+                        do_scroll_x: False
+                        MDGridLayout:
+                            id: product_grid
+                            cols: 2
+                            padding: "5dp"
+                            spacing: "10dp"
+                            adaptive_height: True
+                            size_hint_y: None
+
+            # --- ABA 2: CATEGORIAS ---
+            MDBottomNavigationItem:
+                name: 'categorias'
+                text: 'Categorias'
+                icon: 'view-grid'
+                md_bg_color: "#F5F5F5"
+                
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    MDTopAppBar:
+                        title: "Categorias"
+                        elevation: 0
+                        md_bg_color: "#F5F5F5"
+                        specific_text_color: "#333333"
+                    MDScrollView:
+                        MDList:
+                        # Item 1: Fones de Ouvido e Headphones
+                            OneLineIconListItem:
+                                text: "Fones de Ouvido e Headphones"
+                                on_release: 
+                                    app.definir_busca("Fone,Headphone,Bluetooth")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "headphones"
+
+                        # Item 2: Carregadores e Fontes
+                            OneLineIconListItem:
+                                text: "Carregadores e Fontes"
+                                on_release: 
+                                    app.definir_busca("Carregador,Fonte,Turbo")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "lightning-bolt"
+
+                        # Item 3: Cabos e Adaptadores           
+                            OneLineIconListItem:
+                                text: "Cabos e Adaptadores"
+                                on_release: 
+                                    app.definir_busca("Cabo,Adaptador")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "usb-port"
+
+                        # Item 4: Caixas de Som e Áudio           
+                            OneLineIconListItem:
+                                text: "Caixas de Som e Áudio"
+                                on_release: 
+                                    app.definir_busca("Caixa de som,Áudio,CX de som,Tronsmart Trip,Bluetooth")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "speaker-wireless"
+
+                        # Item 5: Power Banks e Baterias           
+                            OneLineIconListItem:
+                                text: "Power Banks e Baterias"
+                                on_release: 
+                                    app.definir_busca("Power Bank,Carregador")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "battery-charging"
+
+                        # Item 6: Informática e Periféricos       
+                            OneLineIconListItem:
+                                text: "Informática e Periféricos"
+                                on_release: 
+                                    app.definir_busca("Mouse,Teclado,Cartão de memória,Drive,Controle,Caneta")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "laptop"
+
+                        # Item 7: Suportes, Tripés e Iluminação       
+                            OneLineIconListItem:
+                                text: "Suportes, Tripés e Iluminação"
+                                on_release: 
+                                    app.definir_busca("Braçadeira,Kit,Suporte,Tripé,Ring Light")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "floor-lamp"
+
+                        # Item 8: Utilidades, Casa e Lazer      
+                            OneLineIconListItem:
+                                text: "Utilidades, Casa e Lazer"
+                                on_release: 
+                                    app.definir_busca("Acendedor,Balança,Dispensador,Filtro,Fita,Lanterna,Luminária,Estação de carregamento,Umidificador,Ventilador")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "home-variant"
+                                    
+                        # Item 9: Smart Devices e Segurança       
+                            OneLineIconListItem:
+                                text: "Smart Devices e Segurança"
+                                on_release: 
+                                    app.definir_busca("Wifi,Rádio,Relógio,Câmera,MobileTV")
+                                    bottom_nav.switch_tab("inicio")
+                                IconLeftWidget:
+                                    icon: "shield-lock"
+
+            # --- ABA 3: CONTATO ---
+            MDBottomNavigationItem:
+                name: 'contato'
+                text: 'Contato'
+                icon: 'card-account-phone'
+                md_bg_color: "#F5F5F5"
+
+                MDCard:
+                    orientation: "vertical"
+                    size_hint: None, None
+                    size: "400dp", "450dp"
+                    pos_hint: {"center_x": .5, "center_y": .5}
+                    radius: [20,]
+                    elevation: 4
+                    padding: "20dp"
+                    spacing: "15dp"
+
+                    MDIcon:
+                        icon: "store-outline"
+                        halign: "center"
+                        font_size: "70sp"
+                        theme_text_color: "Custom"
+                        text_color: "#283593"
+                    
+                    MDLabel:
+                        text: "Getline Acessórios"
+                        halign: "center"
+                        bold: True
+                        font_style: "H5"
+                        adaptive_height: True
+
+                    MDLabel:
+                        text: "Tecnologia e Qualidade"
+                        halign: "center"
+                        theme_text_color: "Secondary"
+                        font_style: "Caption"
+                        adaptive_height: True
+
+                    MDSeparator:
+
+                    # Lista de Informações
+                    MDScrollView:
+                        MDList:
+                            OneLineIconListItem:
+                                text: "Qualidade Garantida"
+                                IconLeftWidget:
+                                    icon: "check-decagram"
+                                    theme_text_color: "Custom"
+                                    text_color: "#283593"
+
+                            OneLineIconListItem:
+                                text: "Rua Adalcindo Lafaiete, 84, Zabelê"
+                                IconLeftWidget:
+                                    icon: "map-marker"
+                                    theme_text_color: "Custom"
+                                    text_color: "#283593"
+
+                            OneLineIconListItem:
+                                text: "Seg. a Sáb. - 14h às 17h"
+                                IconLeftWidget:
+                                    icon: "clock-outline"
+                                    theme_text_color: "Custom"
+                                    text_color: "#283593"
+
+                    # Botão de Suporte
+                    MDRoundFlatIconButton:
+                        text: "Falar com a proprietária"
+                        icon: "whatsapp"
+                        pos_hint: {"center_x": .5}
+                        text_color: "#25D366"
+                        line_color: "#25D366"
+                        icon_color: "#25D366"
+                        on_release: app.abrir_suporte()
+
+            # --- ABA 4: CARRINHO ---
+            CartScreen:
+                name: 'carrinho'
+                text: 'Carrinho'
+                icon: 'cart'
